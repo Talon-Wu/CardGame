@@ -25,7 +25,9 @@ public class Player implements PlayerInterface, Runnable{
             this.rightNumber = ++playerNumber;
         }
         this.leftNumber = playerNumber;
-        this.playerFile =null;
+        this.playerFile = "Player " + playerNumber;
+        this.leftDeckFile = "Player " + leftNumber;
+        this.rightDeckFile = "Player " + rightNumber;
     }
     @Override
     public void run() {
