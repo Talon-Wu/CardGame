@@ -1,16 +1,16 @@
 public class Card {
-    private int card;
+    private int value;
 
-    public int getCard() {
-        return card;
+    public int getValue() {
+        return value;
     }
 
-    public boolean setCard(int card) {
-        if (card <= 0){
+    public boolean setValue(int value) {
+        if (value <= 0){
             System.out.println("Invalid input");
             return false;
         }
-        this.card = card;
+        this.value = value;
         return true;
     }
 }
