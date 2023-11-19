@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-
+import
 public class Player implements PlayerInterface, Runnable{
     private boolean isWin = false;
     private boolean hasWinner = false;
@@ -79,6 +79,14 @@ public class Player implements PlayerInterface, Runnable{
         if(deleteNumber == -1){
             //that there are only frequent value and player number value
             //e.g. Player1 {1, 2, 2, 2}
+            for (int i = 0; i < handCards.size(); i++) {
+                int num = handCards.get(i).getValue();
+                //get every (value of card) of handCards
+                if(num != playerNumber){
+                    deleteNumber = i;
+                    break;
+                }
+            }
         }
         handCards.remove(deleteNumber);
         return true;
@@ -108,11 +116,17 @@ public class Player implements PlayerInterface, Runnable{
     }
     @Override
     public boolean outputDeck() {
+        int size = handCards.size();
+        int[] handCardsInt = new int[size];
+        for (int i = 0; i < size; i++) {
+            handCardsInt[i] = handCards.get(i).getValue();
+        }
+        //Cardgame game = new CardGame();
         return false;
     }
 
     @Override
-    public boolean writePlayer() {
+    public boolean outputPlayer() {
         return false;
     }
 

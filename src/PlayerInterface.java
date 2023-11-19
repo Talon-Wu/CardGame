@@ -5,6 +5,6 @@ public interface PlayerInterface {
     public boolean pickCard();
     public boolean discardCard();
     public boolean outputDeck();
-    public boolean writePlayer();
+    public boolean outputPlayer();
 
 }
