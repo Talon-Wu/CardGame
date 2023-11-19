@@ -7,7 +7,8 @@ public class Player implements PlayerInterface, Runnable{
         private int rightNumber;
 
         private ArrayList<Card> handCards = new ArrayList<>();
-        private int handCardAmount;//to record how many card the player has
+        private int handCardAmount;
+        //to record how many card the player has
 
         private String playerFile;
         private String leftDeckFile;
