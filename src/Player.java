@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import
 public class Player implements PlayerInterface, Runnable{
     private boolean isWin = false;
     private boolean hasWinner = false;
@@ -34,10 +33,38 @@ public class Player implements PlayerInterface, Runnable{
     }
     @Override
     public void run() {
+        if(CardGame.isWin){
+            // Someone has won
+            int winnerNumber = 0;
+            // not finished variable
+            System.out.println("Player" + winnerNumber + " has won");
+            System.out.println("Player" + playerNumber + " exit");
+            return;
+        }
+        if(checkIWin()){
+            declareAWin();
+            // not implemented
+            System.out.println("Player" + playerNumber + " has won");
+            System.out.println("Player" + playerNumber + " exit");
+            return;
+        }
+
+        synchronized (cardDecks[leftNumber].getLock()){
+            /* pick card from the left deck, use synchronized to
+             ensure any deck can be accessed by only one Player */
+            if( !(pickCard()) ){
+                /* meaning the left deck is empty and Player
+                 can't pick a card from it */
+                System.out.println("The left Deck is empty!");
+                System.out.println("Failed to pick a Card");
+            }
+        }
+
+
 
     }
     @Override
-    public boolean checkWin() {
+    public boolean checkIWin() {
         return false;
     }
 
@@ -53,15 +80,20 @@ public class Player implements PlayerInterface, Runnable{
         Card pickedCard = leftDeck.pickCard();
         //pick the first card of this deck.
 
-        if(pickedCard != null){
+        /* as now the game have a round concept, there
+           is no chance that any deck can be empty.
+         */
+
+
+        //if(pickedCard != null){
             //pickCard() will return a null if the deck is empty.
             handCards.add(pickedCard) ;
             //ArrayList.add() will add Object to the end of the list by default
             return true;
-        } else {
-            return false;
+        //} else {
+         //   return false;
             //the error Output is left to CardGame class to deal with
-        }
+       // }
     }
 
     @Override
@@ -115,19 +147,28 @@ public class Player implements PlayerInterface, Runnable{
         return maxValue;
     }
     @Override
-    public boolean outputDeck() {
+    public boolean outputDeck(int number) {
+        Deck deck = cardDecks[number];
+        int size = deck.getDeckOfCards().size();
+        int[] deckCardsInt = new int[size];
+        for (int i = 0; i < size; i++) {
+            deckCardsInt[i] = handCards.get(i).getValue();
+        }
+        CardGame game = new CardGame();
+        game.output(deckCardsInt);
+        return true;
+    }
+
+    @Override
+    public boolean outputPlayer() {
         int size = handCards.size();
         int[] handCardsInt = new int[size];
         for (int i = 0; i < size; i++) {
             handCardsInt[i] = handCards.get(i).getValue();
         }
-        //Cardgame game = new CardGame();
-        return false;
-    }
-
-    @Override
-    public boolean outputPlayer() {
-        return false;
+        CardGame game = new CardGame();
+        game.output(handCardsInt);
+        return true;
     }
 
 
