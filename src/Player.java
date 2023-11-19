@@ -1,19 +1,22 @@
 import java.util.ArrayList;
 public class Player implements PlayerInterface, Runnable{
-    private boolean isWin = false;
-    private boolean hasWinner = false;
-    private int playerNumber;
-    private int leftNumber;
-    private int rightNumber;
+        private boolean isWin = false;
+        private boolean hasWinner = false;
+        private int playerNumber;
+        private int leftNumber;
+        private int rightNumber;
 
-    private ArrayList<Card> handCards = new ArrayList<>();
-    private int handCardAmount;//to record how many card the player has
+        private ArrayList<Card> handCards = new ArrayList<>();
+        private int handCardAmount;//to record how many card the player has
 
-    private String playerFile;
-    private String leftDeckFile;
+        private String playerFile;
+        private String leftDeckFile;
 
-    private String rightDeckFile;
-    private Deck[] cardDecks;
+        private String rightDeckFile;
+        private Deck[] cardDecks;
+
+        public boolean roundFinished;
+
 
 
     public Player(int playerNumber, int amountOfPlayer,  Deck[] cardDecks){
@@ -33,30 +36,42 @@ public class Player implements PlayerInterface, Runnable{
     }
     @Override
     public void run() {
-        if(CardGame.isWin){
-            // Someone has won
-            int winnerNumber = 0;
-            // not finished variable
-            System.out.println("Player" + winnerNumber + " has won");
-            System.out.println("Player" + playerNumber + " exit");
-            return;
-        }
-        if(checkIWin()){
-            declareAWin();
-            // not implemented
-            System.out.println("Player" + playerNumber + " has won");
-            System.out.println("Player" + playerNumber + " exit");
-            return;
-        }
+        while(true) {
+            if (CardGame.isWin) {
+                // Someone has won
+                int winnerNumber = 0;
+                // not finished variable
+                System.out.println("Player" + winnerNumber + " has won");
+                System.out.println("Player" + playerNumber + " exit");
+                return;
+            }
+            if (checkIWin()) {
+                declareAWin();
+                // not implemented
+                System.out.println("Player" + playerNumber + " has won");
+                System.out.println("Player" + playerNumber + " exit");
+                return;
+            }
 
-        synchronized (cardDecks[leftNumber].getLock()){
+            if (!roundFinished) {
+                // a boolean from CardGame that show if this round of play is over
+                synchronized (cardDecks[leftNumber].getLock()) {
             /* pick card from the left deck, use synchronized to
              ensure any deck can be accessed by only one Player */
-            if( !(pickCard()) ){
-                /* meaning the left deck is empty and Player
-                 can't pick a card from it */
-                System.out.println("The left Deck is empty!");
-                System.out.println("Failed to pick a Card");
+                    pickCard();
+                    outputPlayer();
+                    outputDeck(leftNumber);
+                }
+
+                synchronized (cardDecks[rightNumber].getLock()) {
+            /* pick card from the left deck, use synchronized to
+             ensure any deck can be accessed by only one Player */
+                    discardCard();
+                    outputPlayer();
+                    outputDeck(rightNumber);
+                }
+            }else{
+            Thread.yield();//can be optimized by using wait/notify
             }
         }
 
