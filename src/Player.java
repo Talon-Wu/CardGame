@@ -1,22 +1,30 @@
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 public class Player implements PlayerInterface, Runnable{
-        private boolean isWin = false;
-        private boolean hasWinner = false;
-        private int playerNumber;
-        private int leftNumber;
-        private int rightNumber;
+    private Logger logger = Logger.getLogger(Player.class.getName());
 
-        private ArrayList<Card> handCards = new ArrayList<>();
-        private int handCardAmount;
-        //to record how many card the player has
+    private boolean isWin = false;
+    private boolean hasWinner = false;
+    private int playerNumber;
+    private int leftNumber;
+    private int rightNumber;
 
-        private String playerFile;
-        private String leftDeckFile;
+    private ArrayList<Card> handCards = new ArrayList<>();
+    private int handCardAmount;
+    //to record how many card the player has
 
-        private String rightDeckFile;
-        private Deck[] cardDecks;
+    private String playerFile;
+    private String leftDeckFile;
 
-        public boolean roundFinished;
+    private String rightDeckFile;
+    private Deck[] cardDecks;
+
+    public boolean roundFinished;
 
 
 
@@ -34,6 +42,11 @@ public class Player implements PlayerInterface, Runnable{
         this.playerFile = "Player" + this.playerNumber +"_output";
         this.leftDeckFile = "Deck" + leftNumber + "_output";
         this.rightDeckFile = "Deck" + rightNumber + "_output";
+        try {
+            logger.addHandler(new FileHandler("Player" + Integer.toString(this.playerNumber) + ".log"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     @Override
     public void run() {
@@ -59,23 +72,34 @@ public class Player implements PlayerInterface, Runnable{
                 synchronized (cardDecks[leftNumber].getLock()) {
             /* pick card from the left deck, use synchronized to
              ensure any deck can be accessed by only one Player */
-                    pickCard();
-                    outputPlayer();
-                    outputDeck(leftNumber);
+                    Card card = pickCard();
+                    String message = "Player" + Integer.toString(this.playerNumber) +
+                                     " draws a" + Integer.toString(card.getValue()) +
+                                     " from deck " + Integer.toString(leftNumber);
+                    logger.log(Level.INFO, message);
                 }
 
                 synchronized (cardDecks[rightNumber].getLock()) {
             /* pick card from the left deck, use synchronized to
              ensure any deck can be accessed by only one Player */
-                    discardCard();
-                    outputPlayer();
-                    outputDeck(rightNumber);
+                    Card card = discardCard();
+                    String message = "Player" + Integer.toString(this.playerNumber) +
+                                     " discards a " + Integer.toString(card.getValue()) +
+                                     " to deck " + Integer.toString(rightNumber);
+                    logger.log(Level.INFO, message);
                 }
+
+                // log current hand
+                StringBuilder message = new StringBuilder();
+                for (Card card : handCards) {
+                    message.append(card.toString()).append(" ");
+                }
+                logger.log(Level.INFO, message.toString());
+                //roundFinished = true;
             }else{
-            Thread.yield();//can be optimized by using wait/notify
+                Thread.yield();//can be optimized by using wait/notify
             }
         }
-
 
 
     }
@@ -90,7 +114,7 @@ public class Player implements PlayerInterface, Runnable{
     }
 
     @Override
-    public boolean pickCard() {
+    public Card pickCard() {
         Deck leftDeck = cardDecks[leftNumber];
         //from the Deck array(All the Deck) pick the right one.
         Card pickedCard = leftDeck.pickCard();
@@ -102,18 +126,18 @@ public class Player implements PlayerInterface, Runnable{
 
 
         //if(pickedCard != null){
-            //pickCard() will return a null if the deck is empty.
-            handCards.add(pickedCard) ;
-            //ArrayList.add() will add Object to the end of the list by default
-            return true;
+        //pickCard() will return a null if the deck is empty.
+        handCards.add(pickedCard) ;
+        //ArrayList.add() will add Object to the end of the list by default
+        return pickedCard;
         //} else {
-         //   return false;
-            //the error Output is left to CardGame class to deal with
-       // }
+        //   return false;
+        //the error Output is left to CardGame class to deal with
+        // }
     }
 
     @Override
-    public boolean discardCard() {
+    public Card discardCard() {
         int deleteNumber = -1;
         int most = mostFrequentNumber();
         for (int i = 0; i < handCards.size(); i++) {
@@ -136,8 +160,7 @@ public class Player implements PlayerInterface, Runnable{
                 }
             }
         }
-        handCards.remove(deleteNumber);
-        return true;
+        return handCards.remove(deleteNumber);
     }
 
     public int mostFrequentNumber(){
@@ -164,14 +187,17 @@ public class Player implements PlayerInterface, Runnable{
     }
     @Override
     public boolean outputDeck(int number) {
-        Deck deck = cardDecks[number];
-        int size = deck.getDeckOfCards().size();
+        ArrayList<Card> deck = cardDecks[number].getDeckOfCards();
+        int size = deck.size();
         int[] deckCardsInt = new int[size];
         for (int i = 0; i < size; i++) {
-            deckCardsInt[i] = handCards.get(i).getValue();
+            // deckCardsInt[i] = handCards.get(i).getValue();
+            deckCardsInt[i] = deck.get(i).getValue();
+            // 获得牌堆里的每一个card并转成数字
         }
         CardGame game = new CardGame();
         game.output(deckCardsInt);
+        // 获取int数组，以及对应的路径
         return true;
     }
 
