@@ -6,6 +6,9 @@ public class Card {
         return Integer.toString(this.value);
     }
 
+    public Card(int value) {
+        this.value = value;
+    }
     public int getValue() {
         return value;
     }

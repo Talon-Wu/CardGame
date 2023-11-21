@@ -47,6 +47,9 @@ public class Player implements PlayerInterface, Runnable{
             e.printStackTrace();
         }
     }
+    public Player(){
+
+    }
     @Override
     public void run() {
         while(true) {
