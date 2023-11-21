@@ -160,6 +160,7 @@ public class Player implements PlayerInterface, Runnable{
             }
         }
         return handCards.remove(deleteNumber);
+        // the remove method will both remove an element and return that element
     }
 
     public int mostFrequentNumber(){
