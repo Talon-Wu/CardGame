@@ -1,5 +1,3 @@
-
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.FileHandler;
@@ -7,7 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 public class Player implements PlayerInterface, Runnable{
     private Logger logger = Logger.getLogger(Player.class.getName());
-
+    // added from ShiYu
     private boolean isWin = false;
     private boolean hasWinner = false;
     private int playerNumber;
@@ -42,6 +40,7 @@ public class Player implements PlayerInterface, Runnable{
         this.playerFile = "Player" + this.playerNumber +"_output";
         this.leftDeckFile = "Deck" + leftNumber + "_output";
         this.rightDeckFile = "Deck" + rightNumber + "_output";
+        // added from ShiYu
         try {
             logger.addHandler(new FileHandler("Player" + Integer.toString(this.playerNumber) + ".log"));
         } catch (IOException e) {
@@ -73,9 +72,9 @@ public class Player implements PlayerInterface, Runnable{
             /* pick card from the left deck, use synchronized to
              ensure any deck can be accessed by only one Player */
                     Card card = pickCard();
-                    String message = "Player" + Integer.toString(this.playerNumber) +
-                                     " draws a" + Integer.toString(card.getValue()) +
-                                     " from deck " + Integer.toString(leftNumber);
+                    String message = "Player" + this.playerNumber +
+                                     " draws a" + card.getValue() +
+                                     " from deck " + leftNumber;
                     logger.log(Level.INFO, message);
                 }
 
