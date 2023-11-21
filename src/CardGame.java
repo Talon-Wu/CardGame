@@ -13,20 +13,29 @@ public class CardGame {
 
     public static boolean isWin;
     // private ArrayList<Player> players;
-    private Player[] players;
-    // private ArrayList<Deck> decks;
-    private Deck[] decks;
+//    private Player[] players;
+     private ArrayList<Deck> decks;
+    //private Deck[] decks;
+
+    public static int playerAmount;
 
     public static void main(String[] args) {
         start();
     }
     public static void start() {
         String path = null;
-        try {
-            ArrayList<Card> pack = readPack(path);
-        } catch (IOException e) {
-
-        }
+        CardGame game = new CardGame();
+//        try {
+//            ArrayList<Card> pack = game.readPack(path);
+//        } catch (IOException e) {
+//
+//        }
+//        game.createPlayer(5);
+        playerAmount = game.getPlayerAmount();
+        ArrayList<Card> pack = game.readPack(game.getPackPath());
+        game.createDeck(playerAmount);
+        game.createPlayer(playerAmount);
+        game.dealCards(pack);
     }
     /** Test
      *
@@ -50,20 +59,23 @@ public class CardGame {
         int n = 0;
         while (true) {
             System.out.println("Please enter the number of players");
+
             try {
                 n = scanner.nextInt();
             } catch (InputMismatchException e) {
                 System.out.println("Player amount must be integer");
+                scanner.next();
                 continue;
             }
 
-            if (n <= 0) {
+            if (n <= 1) {
                 System.out.println("The number of players can't be less than 1, please enter again.");
                 continue;
             }
+            System.out.println("successfully get your input");
             break;
         }
-        scanner.close();
+        //scanner.close();
         return n;
     }
 
@@ -95,7 +107,7 @@ public class CardGame {
      * @param path receiving the value we get from getPackPath
      * @return which asks the system to inform the player the reason of fail to read the pack.
      */
-    private boolean getPackPath(String path){
+    public boolean getPackPath(String path){
         try {
             File file = new File(path);
             return file.exists();
@@ -130,11 +142,16 @@ public class CardGame {
      * @param n Creates n decks
      */
     public void createDeck(int n) {
-//        ArrayList<Deck> decks = new ArrayList<>(n);
-        decks = new Deck[n + 1];
-        // for decks, we use it from decks[1], so the size should be n + 1
-        for (int i = 1; i < n + 1; i++) {
-            decks[i] = new Deck();
+////        ArrayList<Deck> decks = new ArrayList<>(n);
+//        decks = new Deck[n + 1];
+//        // for decks, we use it from decks[1], so the size should be n + 1
+//        for (int i = 0; i < n ; i++) {
+//            decks[i] = new Deck();
+//        }
+//        this.decks = decks;
+        ArrayList<Deck> decks = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) {
+            decks.add(new Deck());
         }
         this.decks = decks;
     }
@@ -144,12 +161,17 @@ public class CardGame {
      * @param n Creates n players
      */
     public void createPlayer(int n){
-//        ArrayList<Player> players = new ArrayList<>(n);
-        players = new Player[n + 1];
-        // for players, we use it from players[1], so the size should be n + 1
-        for (int i = 1; i < n; i++){
-            players[i] = new Player(i,n,this.decks) ;
-            //
+////        ArrayList<Player> players = new ArrayList<>(n);
+//       // players = new Player[n + 1];
+//        // for players, we use it from players[1], so the size should be n + 1
+//        for (int i = 0; i < n; i++){
+//            players[i] = new Player(i,n,this.decks) ;
+//            //
+//        }
+//        this.players = players;
+        ArrayList<Player> players = new ArrayList<>(n);
+        for (int i = 0; i < n; i++){
+            players.add(new Player(i,n,this.decks));
         }
         this.players = players;
     }
@@ -171,6 +193,12 @@ public class CardGame {
         try {
             while (true) {
                 for (Deck deck : this.decks) {
+                    if(deck.getDeckOfCards() == null){
+                        System.out.println("get a null from Player");
+                        continue;
+                    }else{
+                        System.out.println("get a AL from deck");
+                    }
                     deck.getDeckOfCards().add(pack.get(cardIndex++));
                 }
             }
@@ -202,7 +230,7 @@ public class CardGame {
      * @ line A variable, temporary restore each line of numbers just read
      * @ throws IOException
      */
-    public ArrayList<Card> readPack(String filePath) throws IOException {
+    public ArrayList<Card> readPack(String filePath) {
         ArrayList<Card> cards = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -210,6 +238,8 @@ public class CardGame {
                 int card = Integer.parseInt(line.trim());
                 cards.add(new Card(card));
             }
+        } catch(IOException e){
+
         }
         return cards;
     }

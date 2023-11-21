@@ -21,12 +21,14 @@ public class Player implements PlayerInterface, Runnable{
 
     private String rightDeckFile;
     private Deck[] cardDecks;
+    //ArrayList<Deck> cardDecks;
 
     public boolean roundFinished;
 
 
 
-    public Player(int playerNumber, int amountOfPlayer,  Deck[] cardDecks){
+   public Player(int playerNumber, int amountOfPlayer,  Deck[] cardDecks){
+   //public Player(int playerNumber, int amountOfPlayer,  ArrayList<Deck> cardDecks){
         this.playerNumber = playerNumber;
         this.cardDecks = cardDecks;
         if(playerNumber == amountOfPlayer){
@@ -199,7 +201,7 @@ public class Player implements PlayerInterface, Runnable{
             // 获得牌堆里的每一个card并转成数字
         }
         CardGame game = new CardGame();
-        game.output(deckCardsInt);
+        //game.output(deckCardsInt);
         // 获取int数组，以及对应的路径
         return true;
     }
@@ -212,7 +214,7 @@ public class Player implements PlayerInterface, Runnable{
             handCardsInt[i] = handCards.get(i).getValue();
         }
         CardGame game = new CardGame();
-        game.output(handCardsInt);
+        //game.output(handCardsInt);
         return true;
     }
 
