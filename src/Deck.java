@@ -24,4 +24,9 @@ public class Deck {
         //    return null;
        // }
     }
+
+    public void writeToFile() {
+
+    }
+
 }
