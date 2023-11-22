@@ -12,8 +12,17 @@ import java.util.Scanner;
 public class CardGame {
 
     public static boolean isWin;
-    // private ArrayList<Player> players;
-//    private Player[] players;
+     private ArrayList<Player> players;
+
+    public ArrayList<Player> getPlayers() {
+        return players;
+    }
+
+    public ArrayList<Deck> getDecks() {
+        return decks;
+    }
+
+    //    private Player[] players;
      private ArrayList<Deck> decks;
     //private Deck[] decks;
 
@@ -68,16 +77,16 @@ public class CardGame {
                 continue;
             }
 
-            if (n <= 1) {
+            if (n <= 0) {
                 System.out.println("The number of players can't be less than 1, please enter again.");
                 continue;
             }
             System.out.println("successfully get your input");
             break;
         }
-        //scanner.close();
         return n;
     }
+
 
     /**
      * Ask the player which file he wants to load
@@ -91,33 +100,34 @@ public class CardGame {
             System.out.println("Please enter location of pack to load");
             path = scanner.nextLine();
 
-            if (getPackPath(path)) {
+            if (!path.endsWith(".txt")){
+                System.out.println("PLease enter a .txt file");
+                continue;
+            }
+
+            if (pathExists(path)) {
                 break;
             } else {
                 System.out.println("Invalid file location, please enter again.");
             }
         }
-        scanner.close();
         return path;
         // Needs to add what if the path entered is invalid
     }
+
 
     /**
      * This part explains what will happen if the pack the player input is invalid.
      * @param path receiving the value we get from getPackPath
      * @return which asks the system to inform the player the reason of fail to read the pack.
      */
-    public boolean getPackPath(String path){
-        try {
-            File file = new File(path);
-            return file.exists();
-        } catch (Exception e){
-            return false;
-        }
+    private static boolean pathExists(String path){
+        File file = new File(path);
+        return file.exists();
     }
 
     /**
-     * Generates a pack
+     * Generates a pack, not used now
      *
      * @param n generates 8n numbers
      * @return Generated pack
@@ -186,7 +196,9 @@ public class CardGame {
         int cardIndex = 0;
         for (int j = 0; j < 4; j++) {
             for (Player player : this.players) {
+                //System.out.println("successfully added a card from pack " + cardIndex);
                 player.getHandCards().add(pack.get(cardIndex++));
+
             }
         }
 
@@ -197,9 +209,16 @@ public class CardGame {
                         System.out.println("get a null from Player");
                         continue;
                     }else{
-                        System.out.println("get a AL from deck");
+                        //System.out.println("get a AL from deck");
                     }
-                    deck.getDeckOfCards().add(pack.get(cardIndex++));
+                   // System.out.println("get a card from pack" + cardIndex);
+                    Card card = pack.get(cardIndex++);
+                    if(card != null){
+                        deck.getDeckOfCards().add(card);
+                        //System.out.println("get a card from pack" + cardIndex);
+                       // System.out.println("end getting" + cardIndex);
+                    }
+
                 }
             }
         } catch (IndexOutOfBoundsException ignored) { }

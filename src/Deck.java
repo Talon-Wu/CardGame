@@ -1,8 +1,11 @@
 import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Deck {
 
-    private Object lock = new Object();
+
+
+    private ReentrantLock lock = new ReentrantLock();
     private ArrayList<Card> deckOfCards = new ArrayList<>();
     public Card pickCard(){
        // if(!deckOfCards.isEmpty()){
@@ -12,7 +15,8 @@ public class Deck {
         //    return null;
        // }
     }
-    public Object getLock() {
+
+    public ReentrantLock getLock() {
         return lock;
     }
     public ArrayList<Card> getDeckOfCards() {

@@ -20,6 +20,23 @@ import java.util.ArrayList;
         game.createDeck(CardGame.playerAmount);
         game.createPlayer(CardGame.playerAmount);
         game.dealCards(pack);
+        ArrayList<Player> Players = game.getPlayers();
+        for (Player player : Players){
+            System.out.println("Player");
+            for (Card card : player.getHandCards()){
+                System.out.println(card.getValue());
+            }
+        }
+        ArrayList<Deck> Decks = game.getDecks();
+        for (Deck deck : Decks){
+            System.out.println("Deck");
+            for (Card card : deck.getDeckOfCards()){
+                System.out.println(card.getValue());
+            }
+        }
+        Thread thread1 = new Thread(Players.get(0));
+        thread1.start();
+
     }
 
 }

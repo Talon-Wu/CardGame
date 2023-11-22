@@ -20,28 +20,32 @@ public class Player implements PlayerInterface, Runnable{
     private String leftDeckFile;
 
     private String rightDeckFile;
-    private Deck[] cardDecks;
-    //ArrayList<Deck> cardDecks;
+    //private Deck[] cardDecks;
+    ArrayList<Deck> cardDecks;
 
-    public boolean roundFinished;
+    public boolean roundFinished = false;
 
 
 
-   public Player(int playerNumber, int amountOfPlayer,  Deck[] cardDecks){
+   public Player(int playerNumber, int amountOfPlayer,  ArrayList<Deck> cardDecks){
    //public Player(int playerNumber, int amountOfPlayer,  ArrayList<Deck> cardDecks){
         this.playerNumber = playerNumber;
         this.cardDecks = cardDecks;
         if(playerNumber == amountOfPlayer){
             //last player
-            this.rightNumber = 1;
+            this.rightNumber = 0;
         }else{
             //normal player
-            this.rightNumber = ++playerNumber;
+            this.rightNumber = playerNumber + 1;
+            // The ArrayList start from 0,
+            // so Player1(0)'s right number is Deck2(1)
+            // that is 1 in ArrayList
         }
-        this.leftNumber = playerNumber;
-        this.playerFile = "Player" + this.playerNumber +"_output";
-        this.leftDeckFile = "Deck" + leftNumber + "_output";
-        this.rightDeckFile = "Deck" + rightNumber + "_output";
+        this.leftNumber = playerNumber ;
+        // The ArrayList start from 0, so the left number should - 1
+        this.playerFile = "Player" + this.playerNumber +"_output.txt";
+        this.leftDeckFile = "Deck" + leftNumber + "_output.txt";
+        this.rightDeckFile = "Deck" + rightNumber + "_output.txt";
         // added from ShiYu
         try {
             logger.addHandler(new FileHandler("Player" + Integer.toString(this.playerNumber) + ".log"));
@@ -54,6 +58,7 @@ public class Player implements PlayerInterface, Runnable{
     }
     @Override
     public void run() {
+        System.out.println("run");
         while(true) {
             if (CardGame.isWin) {
                 // Someone has won
@@ -70,39 +75,59 @@ public class Player implements PlayerInterface, Runnable{
                 System.out.println("Player" + playerNumber + " exit");
                 return;
             }
-
-            if (!roundFinished) {
+            //!roundFinished
+            if (cardDecks.get(leftNumber).getLock().tryLock()) {
                 // a boolean from CardGame that show if this round of play is over
-                synchronized (cardDecks[leftNumber].getLock()) {
+                System.out.println("intoLeft");
+                synchronized (cardDecks.get(leftNumber).getLock()) {
             /* pick card from the left deck, use synchronized to
              ensure any deck can be accessed by only one Player */
                     Card card = pickCard();
+                    System.out.println("pickCard");
                     String message = "Player" + this.playerNumber +
                                      " draws a" + card.getValue() +
                                      " from deck " + leftNumber;
                     logger.log(Level.INFO, message);
-                }
+                    System.out.println("Player" + this.playerNumber);
 
-                synchronized (cardDecks[rightNumber].getLock()) {
+                    for (Card card0 : this.getHandCards()){
+                        System.out.println(card0.getValue());
+                    }
+                }
+                // log current hand
+//                StringBuilder message = new StringBuilder();
+//                for (Card card : handCards) {
+//                    message.append(card.toString()).append(" ");
+//                }
+//                logger.log(Level.INFO, message.toString());
+//                //roundFinished = true;
+            }else{
+                System.out.println("yieldLeftNumber");
+                Thread.yield();//can be optimized by using wait/notify
+            }
+
+            if (cardDecks.get(rightNumber).getLock().tryLock()) {
+                System.out.println("intoRight");
+                synchronized (cardDecks.get(rightNumber).getLock()) {
             /* pick card from the left deck, use synchronized to
              ensure any deck can be accessed by only one Player */
                     Card card = discardCard();
+                    System.out.println("discardCard");
                     String message = "Player" + Integer.toString(this.playerNumber) +
-                                     " discards a " + Integer.toString(card.getValue()) +
-                                     " to deck " + Integer.toString(rightNumber);
+                            " discards a " + Integer.toString(card.getValue()) +
+                            " to deck " + Integer.toString(rightNumber);
                     logger.log(Level.INFO, message);
-                }
 
-                // log current hand
-                StringBuilder message = new StringBuilder();
-                for (Card card : handCards) {
-                    message.append(card.toString()).append(" ");
+                    System.out.println("Player" + this.playerNumber);
+                    for (Card card0 : this.getHandCards()) {
+                        System.out.println(card0.getValue());
+                    }
                 }
-                logger.log(Level.INFO, message.toString());
-                //roundFinished = true;
             }else{
+                System.out.println("yield rightNumber");
                 Thread.yield();//can be optimized by using wait/notify
             }
+
         }
 
 
@@ -119,7 +144,7 @@ public class Player implements PlayerInterface, Runnable{
 
     @Override
     public Card pickCard() {
-        Deck leftDeck = cardDecks[leftNumber];
+        Deck leftDeck = cardDecks.get(leftNumber);
         //from the Deck array(All the Deck) pick the right one.
         Card pickedCard = leftDeck.pickCard();
         //pick the first card of this deck.
@@ -192,7 +217,7 @@ public class Player implements PlayerInterface, Runnable{
     }
     @Override
     public boolean outputDeck(int number) {
-        ArrayList<Card> deck = cardDecks[number].getDeckOfCards();
+        ArrayList<Card> deck = cardDecks.get(number).getDeckOfCards();
         int size = deck.size();
         int[] deckCardsInt = new int[size];
         for (int i = 0; i < size; i++) {
@@ -261,11 +286,11 @@ public class Player implements PlayerInterface, Runnable{
         this.rightDeckFile = rightDeckFile;
     }
 
-    public Deck[] getCardDecks() {
+    public ArrayList<Deck> getCardDecks() {
         return cardDecks;
     }
 
-    public void setCardDecks(Deck[] cardDecks) {
+    public void setCardDecks(ArrayList<Deck> cardDecks) {
         this.cardDecks = cardDecks;
     }
 
