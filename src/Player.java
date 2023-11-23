@@ -13,7 +13,7 @@ public class Player implements PlayerInterface, Runnable {
     private int rightNumber;
     public int lastPlayer;
     public int nextPlayer;
-
+    public int showNumber;
     public Object lastLock;
     public Object nextLock;
     public Object myLock = new Object();
@@ -41,6 +41,7 @@ public class Player implements PlayerInterface, Runnable {
     public Player(int playerNumber, int amountOfPlayer, ArrayList<Deck> cardDecks, CardGame gameInstance) {
         //public Player(int playerNumber, int amountOfPlayer,  ArrayList<Deck> cardDecks){
         this.playerNumber = playerNumber;
+        this.showNumber = playerNumber + 1;
         this.cardDecks = cardDecks;
         if (playerNumber == amountOfPlayer - 1) {
             //last player
@@ -90,6 +91,8 @@ public class Player implements PlayerInterface, Runnable {
                 // not implemented
                 System.out.println("Player" + playerNumber + " has won");
                 System.out.println("Player" + playerNumber + " exit");
+//                cardDecks.get(leftNumber).getLock().unlock();
+//                cardDecks.get(rightNumber).getLock().unlock();
                 return;
             }
             //!roundFinished
@@ -123,7 +126,9 @@ public class Player implements PlayerInterface, Runnable {
                 } else {
                 System.out.println("Player" + playerNumber + "should wait for Player" + lastPlayer);
                 try {synchronized (this){
-                    wait();}//can be optimized by using wait/notify
+                    wait(500);
+                    continue;
+                }//can be optimized by using wait/notify
                 } catch (InterruptedException e) {
                     //throw new RuntimeException(e);
                 }
@@ -157,7 +162,8 @@ public class Player implements PlayerInterface, Runnable {
                 System.out.println("Player" + playerNumber + "should wait for Player" + nextPlayer);
                 try {
                     synchronized (this){
-                    wait();}//can be optimized by using wait/notify
+                    wait();
+                    }//can be optimized by using wait/notify
                 } catch (InterruptedException e) {
                     //throw new RuntimeException(e);
                 }
@@ -174,8 +180,10 @@ public class Player implements PlayerInterface, Runnable {
     @Override
     public boolean checkIWin() {
         boolean isWin = true;
-
-        for (int i = 0; i < 3; i++){
+        if(handCards.size() != 4){
+            return false;
+        }
+        for (int i = 0; i < handCards.size() - 1; i++){
             if (handCards.get(i).getValue() != handCards.get(i + 1).getValue()) {
                 // if there are different values in handCards
                 // then this player isn't win, set the isWin to false
@@ -230,7 +238,7 @@ public class Player implements PlayerInterface, Runnable {
         for (int i = 0; i < handCards.size(); i++) {
             int num = handCards.get(i).getValue();
             //get every (value of card) of handCards
-            if (num != most && num != (playerNumber + 1)) {
+            if (num != most && num != (showNumber)) {
                 // player number: 1, 2, 3 ArrayList number: 0, 1, 2
                 deleteNumber = i;
                 break;
@@ -242,7 +250,7 @@ public class Player implements PlayerInterface, Runnable {
             for (int i = 0; i < handCards.size(); i++) {
                 int num = handCards.get(i).getValue();
                 //get every (value of card) of handCards
-                if (num != playerNumber + 1) {
+                if (num != showNumber) {
                     deleteNumber = i;
                     break;
                 }
