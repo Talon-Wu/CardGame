@@ -25,7 +25,8 @@ public class Player implements PlayerInterface, Runnable {
     public ArrayList<Deck> cardDecks;
 
     public boolean roundFinished = false;
-
+    public static Player[] players = new Player[10];
+    // max volume of player is 10
     public CardGame gameInstance;
 
     public void addToHandCards(Card card) {
@@ -59,22 +60,23 @@ public class Player implements PlayerInterface, Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        players[playerNumber] = this;
         this.gameInstance = gameInstance;
     }
 
     @Override
     public void run() {
         System.out.println("run");
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!hasWinner) {
             // if this thread is not interrupted, then he runs his run();
-            if (this.gameInstance.hasWinner) {
-                // Someone has won
-                int winnerNumber = 0;
-                // not finished variable
-                System.out.println("Player" + winnerNumber + " has won");
-                System.out.println("Player" + playerNumber + " exit");
-                return;
-            }
+//            if (this.gameInstance.hasWinner) {
+//                // Someone has won
+//                int winnerNumber = 0;
+//                // not finished variable
+//                System.out.println("Player" + winnerNumber + " has won");
+//                System.out.println("Player" + playerNumber + " exit");
+//                return;
+//            }
             if (checkIWin()) {
                 declareAWin();
                 // not implemented
@@ -90,18 +92,23 @@ public class Player implements PlayerInterface, Runnable {
             /* pick card from the left deck, use synchronized to
              ensure any deck can be accessed by only one Player */
                     Card card = pickCard();
-                    System.out.println("Player" + playerNumber +"pickCard");
-                    String message = "Player" + this.playerNumber +
-                            " draws a" + card.getValue() +
-                            " from deck " + leftNumber;
-                    logger.log(Level.INFO, message);
-                    System.out.println("Player" + this.playerNumber + "handCards:");
+                    if (card != null) {
+                        System.out.println("Player" + playerNumber + "pickCard");
+                        String message = "Player" + this.playerNumber +
+                                " draws a" + card.getValue() +
+                                " from deck " + leftNumber;
+                        logger.log(Level.INFO, message);
+                    }else {
+                        System.out.println("Player" + playerNumber + " can't pickCard");
+                    }
+                    //System.out.println("Player" + this.playerNumber + "handCards:");
 //                    for (Card card0 : this.getHandCards()) {
 //                        System.out.println(card0.getValue());
 //                    }
-                }
-                cardDecks.get(leftNumber).getLock().notify();
+                    cardDecks.get(leftNumber).getLock().unlock();
 
+                    }
+                }
                 // log current hand
 //                StringBuilder message = new StringBuilder();
 //                for (Card card : handCards) {
@@ -110,7 +117,7 @@ public class Player implements PlayerInterface, Runnable {
 //                wrong
 //                logger.log(Level.INFO, message.toString());
 //                //roundFinished = true;
-            } else {
+             else {
                 System.out.println("Player" + playerNumber + "yieldLeftNumber");
                 Thread.yield();//can be optimized by using wait/notify
             }
@@ -131,15 +138,18 @@ public class Player implements PlayerInterface, Runnable {
                     for (Card card0 : this.getHandCards()) {
                         System.out.println(card0.getValue());
                     }
+                    cardDecks.get(rightNumber).getLock().unlock();
                 }
-                cardDecks.get(rightNumber).getLock().notify();
+
             } else {
                 System.out.println("Player" + playerNumber + "yieldLeftNumber");
                 Thread.yield();//can be optimized by using wait/notify
             }
 
         }
-
+        System.out.println("This game has a winner now.");
+        System.out.println("Player"+ playerNumber+ " 's losing hand: ");
+        System.out.println("Player"+ playerNumber+ " now exit.");
 
     }
 
@@ -152,6 +162,8 @@ public class Player implements PlayerInterface, Runnable {
                 // if there are different values in handCards
                 // then this player isn't win, set the isWin to false
                 isWin = false;
+                //Thread.currentThread().interrupt();
+                // should interrupt other threads
                 break;
             }
         }
@@ -177,15 +189,16 @@ public class Player implements PlayerInterface, Runnable {
          */
 
 
-        //if(pickedCard != null){
+        if(pickedCard != null){
         //pickCard() will return a null if the deck is empty.
         handCards.add(pickedCard);
         //ArrayList.add() will add Object to the end of the list by default
         return pickedCard;
-        //} else {
-        //   return false;
+        } else {
+           return null;
         //the error Output is left to CardGame class to deal with
-        // }
+        }
+
     }
 
     @Override
