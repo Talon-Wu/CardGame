@@ -187,6 +187,12 @@ public class CardGame {
             System.out.println("Player " + i + " added");
         }
         this.players = players;
+        for(Player player : players){
+            player.lastLock = players.get(player.lastPlayer).myLock;
+            player.nextLock = players.get(player.nextPlayer).myLock;
+        }
+//        lastLock = players[lastPlayer].myLock;
+//        nextLock = players[nextPlayer].myLock;
     }
 
     /**
