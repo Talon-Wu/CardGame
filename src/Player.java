@@ -7,6 +7,7 @@ public class Player implements PlayerInterface, Runnable {
     private Logger logger = Logger.getLogger(Player.class.getName());
     // added from ShiYu
     private boolean isWin = false;
+    // variable to check if this thread win
     private boolean hasWinner = false;
     private int playerNumber;
     private int leftNumber;
@@ -21,7 +22,7 @@ public class Player implements PlayerInterface, Runnable {
 
     private String rightDeckFile;
     //private Deck[] cardDecks;
-    private ArrayList<Deck> cardDecks;
+    public ArrayList<Deck> cardDecks;
 
     public boolean roundFinished = false;
 
@@ -64,8 +65,9 @@ public class Player implements PlayerInterface, Runnable {
     @Override
     public void run() {
         System.out.println("run");
-        while (true) {
-            if (this.gameInstance.isWin) {
+        while (!Thread.currentThread().isInterrupted()) {
+            // if this thread is not interrupted, then he runs his run();
+            if (this.gameInstance.hasWinner) {
                 // Someone has won
                 int winnerNumber = 0;
                 // not finished variable
@@ -98,6 +100,8 @@ public class Player implements PlayerInterface, Runnable {
 //                        System.out.println(card0.getValue());
 //                    }
                 }
+                cardDecks.get(leftNumber).getLock().notify();
+
                 // log current hand
 //                StringBuilder message = new StringBuilder();
 //                for (Card card : handCards) {
@@ -128,6 +132,7 @@ public class Player implements PlayerInterface, Runnable {
                         System.out.println(card0.getValue());
                     }
                 }
+                cardDecks.get(rightNumber).getLock().notify();
             } else {
                 System.out.println("Player" + playerNumber + "yieldLeftNumber");
                 Thread.yield();//can be optimized by using wait/notify
@@ -140,12 +145,22 @@ public class Player implements PlayerInterface, Runnable {
 
     @Override
     public boolean checkIWin() {
-        return false;
+        boolean isWin = true;
+
+        for (int i = 0; i < 3; i++){
+            if (handCards.get(i).getValue() != handCards.get(i + 1).getValue()) {
+                // if there are different values in handCards
+                // then this player isn't win, set the isWin to false
+                isWin = false;
+                break;
+            }
+        }
+        return isWin;
     }
 
     @Override
     public boolean declareAWin() {
-        this.gameInstance.isWin = true;
+        this.gameInstance.hasWinner = true;
         this.gameInstance.whoWin = this;
         return true;
     }

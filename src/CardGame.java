@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class CardGame {
 
-    public static boolean isWin;
+    public static boolean hasWinner = false;
 
     public Player whoWin;
     private ArrayList<Player> players;
