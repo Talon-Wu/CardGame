@@ -4,9 +4,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Deck {
 
 
-
     private ReentrantLock lock = new ReentrantLock();
-    private ArrayList<Card> deckOfCards = new ArrayList<>();
+    private ArrayList<Card> deckOfCards = new ArrayList<>();// cardsOfDeck 更好
     public Card pickCard(){
        // if(!deckOfCards.isEmpty()){
             Card pickedCard = deckOfCards.get(0);
@@ -15,7 +14,9 @@ public class Deck {
         //    return null;
        // }
     }
-
+    public void addToDeck(Card card) {
+        this.deckOfCards.add(card);
+    }
     public ReentrantLock getLock() {
         return lock;
     }

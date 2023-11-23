@@ -12,7 +12,9 @@ import java.util.Scanner;
 public class CardGame {
 
     public static boolean isWin;
-     private ArrayList<Player> players;
+
+    public Player whoWin;
+    private ArrayList<Player> players;
 
     public ArrayList<Player> getPlayers() {
         return players;
@@ -28,10 +30,10 @@ public class CardGame {
 
     public static int playerAmount;
 
-    public static void main(String[] args) {
+    public static void main(String[] args)throws IOException {
         start();
     }
-    public static void start() {
+    public static void start() throws IOException{
         String path = null;
         CardGame game = new CardGame();
 //        try {
@@ -167,7 +169,7 @@ public class CardGame {
     }
 
     /**
-     * Creates decks and stores them in the decks attribute
+     * Creates players and stores them in the players attribute
      * @param n Creates n players
      */
     public void createPlayer(int n){
@@ -181,7 +183,8 @@ public class CardGame {
 //        this.players = players;
         ArrayList<Player> players = new ArrayList<>(n);
         for (int i = 0; i < n; i++){
-            players.add(new Player(i,n,this.decks));
+            players.add(new Player(i,n,this.decks,this));
+            System.out.println("Player " + i + " added");
         }
         this.players = players;
     }
@@ -248,18 +251,37 @@ public class CardGame {
      * @return Card reads from the file
      * @ line A variable, temporary restore each line of numbers just read
      * @ throws IOException
+     * Checks whether the integer number in the file equals 8n, whether the file is null,
+     * and if there is only 1 integer per line.
      */
-    public ArrayList<Card> readPack(String filePath) {
+    public static ArrayList<Card> readPack(String filePath) throws IOException {
         ArrayList<Card> cards = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null){
-                int card = Integer.parseInt(line.trim());
-                cards.add(new Card(card));
+                // Check if the file is null
+                if (line.trim().isEmpty()){
+                    throw new IOException("File is empty");
+                }
+
+                try {
+                    //parseInt checks whether there's an integer in the line
+                    int card = Integer.parseInt(line.trim());
+                    cards.add(new Card(card));
+                } catch (NumberFormatException e){
+                    throw new IOException();
+                }
+
             }
-        } catch(IOException e){
+            // Check whether the total number of Integers in the file equals to 8n
+            if (cards.size() % 8 !=0) {
+                throw new IOException();
+            }
+
 
         }
         return cards;
     }
+
 }
+

@@ -47,18 +47,18 @@ import java.util.Arrays;
     public void main() {
         ArrayList<Player> Players = game.getPlayers();
         ArrayList<Deck> Decks = game.getDecks();
+        int count = 0;
+        for (Player player : Players) {
+            System.out.println("Player"+ (count++));
+            for (Card card : player.getHandCards()) {
+                System.out.println(card.getValue());
+            }
+        }
         Thread thread1 = new Thread(Players.get(0));
         thread1.start();
         Thread thread2 = new Thread(Players.get(1));
         thread2.start();
         //System.out.println(1);
-        for (Player player : Players){
-            System.out.println("Player");
-            for (Card card : player.getHandCards()){
-                System.out.println(card.getValue());
-            }
-        }
-    }
 
 //    @Test
 //    public void start() {
@@ -106,4 +106,4 @@ import java.util.Arrays;
 //    public void readPack() {
 //        System.out.println(1);
 //    }
-}
+    }}
