@@ -91,8 +91,14 @@ public class Player implements PlayerInterface, Runnable {
                 // not implemented
                 System.out.println("Player" + playerNumber + " has won");
                 System.out.println("Player" + playerNumber + " exit");
-//                cardDecks.get(leftNumber).getLock().unlock();
-//                cardDecks.get(rightNumber).getLock().unlock();
+                if (cardDecks.get(leftNumber).getLock().tryLock()){
+                    cardDecks.get(leftNumber).getLock().unlock();
+                    System.out.println("successfully release lock of deck" + leftNumber);
+                    }
+                if (cardDecks.get(rightNumber).getLock().tryLock()){
+                    cardDecks.get(rightNumber).getLock().unlock();
+                    System.out.println("successfully release lock of deck" + rightNumber);
+                    }
                 return;
             }
             //!roundFinished
@@ -126,7 +132,7 @@ public class Player implements PlayerInterface, Runnable {
                 } else {
                 System.out.println("Player" + playerNumber + "should wait for Player" + lastPlayer);
                 try {synchronized (this){
-                    wait(500);
+                    wait(1500);
                     continue;
                 }//can be optimized by using wait/notify
                 } catch (InterruptedException e) {
@@ -162,7 +168,7 @@ public class Player implements PlayerInterface, Runnable {
                 System.out.println("Player" + playerNumber + "should wait for Player" + nextPlayer);
                 try {
                     synchronized (this){
-                    wait();
+                    wait(1500);
                     }//can be optimized by using wait/notify
                 } catch (InterruptedException e) {
                     //throw new RuntimeException(e);
@@ -251,6 +257,7 @@ public class Player implements PlayerInterface, Runnable {
                 int num = handCards.get(i).getValue();
                 //get every (value of card) of handCards
                 if (num != showNumber) {
+                    // wrong
                     deleteNumber = i;
                     break;
                 }

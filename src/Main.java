@@ -10,9 +10,13 @@ import java.util.Arrays;
         CardGame game = new CardGame();
         Card card1 = new Card(1);
         Card card2 = new Card(2);
-        ArrayList<Card> pack = new ArrayList<Card>(Arrays.asList(
-                card1,card1,card2,card2,card1,card1,card2,card2,
-                card1,card1,card2,card2,card1,card1,card2,card2
+//        ArrayList<Card> pack = new ArrayList<Card>(Arrays.asList(
+//                card1,card1,card2,card2,card1,card1,card2,card2,
+//                card1,card1,card2,card2,card1,card1,card2,card2
+//        ));
+                ArrayList<Card> pack = new ArrayList<Card>(Arrays.asList(
+                card2,card2,card1,card1,card2,card2,card1,card1,
+                card2,card2,card1,card1,card2,card2,card1,card1
         ));
         game.createDeck(2);
         game.createPlayer(2);
