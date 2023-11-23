@@ -142,9 +142,11 @@ public class Player implements PlayerInterface, Runnable {
 //                    logger.log(Level.INFO, message);
 
                     System.out.println("Player" + this.playerNumber+ "handCards:");
+                    int i = 0;
                     for (Card card0 : this.getHandCards()) {
-                        System.out.println(card0.getValue());
+                        System.out.println("Player" + this.playerNumber+ "handCards"+ (++i) +":" + card0.getValue());
                     }
+                    i = 0;
                     cardDecks.get(rightNumber).getLock().unlock();
                     cardDecks.get(rightNumber).getLock().notify();
                 }
