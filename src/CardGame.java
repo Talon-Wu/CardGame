@@ -43,10 +43,13 @@ public class CardGame {
 //        }
 //        game.createPlayer(5);
         playerAmount = game.getPlayerAmount();
-        ArrayList<Card> pack = game.readPack(game.getPackPath());
+        ArrayList<Card> pack = CardGame.readPack(game.getPackPath());
         game.createDeck(playerAmount);
         game.createPlayer(playerAmount);
         game.dealCards(pack);
+        for (Player player:game.players) {
+            new Thread(player).start();
+        }
     }
     /** Test
      *
@@ -134,7 +137,7 @@ public class CardGame {
      * @param n generates 8n numbers
      * @return Generated pack
      */
-    public ArrayList<Integer> generatePack(int n) {
+    public static ArrayList<Integer> generatePack(int n) {
         ArrayList<Integer> result = new ArrayList<>();
 
         // Generate 4 cards for each number

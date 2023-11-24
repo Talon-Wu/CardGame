@@ -53,11 +53,8 @@ import java.util.Arrays;
             for (Card card : player.getHandCards()) {
                 System.out.println(card.getValue());
             }
+            new Thread(player).start();
         }
-        Thread thread1 = new Thread(Players.get(0));
-        thread1.start();
-        Thread thread2 = new Thread(Players.get(1));
-        thread2.start();
         //System.out.println(1);
 
 //    @Test

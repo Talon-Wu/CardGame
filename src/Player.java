@@ -5,9 +5,8 @@ import java.util.logging.Logger;
 public class Player implements PlayerInterface, Runnable {
     private Logger logger = Logger.getLogger(Player.class.getName());
     // added from ShiYu
-    private boolean isWin = false;
-    // variable to check if this thread win
     private boolean hasWinner = false;
+    // variable to check if this thread win
     private int playerNumber;
     private int leftNumber;
     private int rightNumber;
@@ -84,8 +83,7 @@ public class Player implements PlayerInterface, Runnable {
 
     @Override
     public void run() {
-        System.out.println("run");
-        while (!hasWinner) {
+        while (!CardGame.hasWinner) {
             if (checkIWin()) {
                 declareAWin();
                 // not implemented
@@ -99,8 +97,11 @@ public class Player implements PlayerInterface, Runnable {
                     cardDecks.get(rightNumber).getLock().unlock();
                     System.out.println("successfully release lock of deck" + rightNumber);
                     }
+
                 return;
-            }
+                }
+
+
             //!roundFinished
             if (cardDecks.get(leftNumber).getLock().tryLock()) {
                 // now this thread gain the lock of left deck
@@ -181,30 +182,36 @@ public class Player implements PlayerInterface, Runnable {
             }
 
         }
-        System.out.println("This game has a winner now.");
+        /**
+         * Need something else rather than players to represent the rest of the players.
+         */
+
+        System.out.println("Player "+this.gameInstance.whoWin.getPlayerNumber()+" has informed player "+this.playerNumber);
 //      System.out.println("Player" + winnerNumber + " has won");
         System.out.println("Player"+ playerNumber+ " 's losing hand: ");
+        for (Card card : getHandCards()){
+            System.out.println(card.getValue());
+        }
         System.out.println("Player"+ playerNumber+ " now exit.");
 
     }
 
     @Override
     public boolean checkIWin() {
-        boolean isWin = true;
+        boolean hasWinner = true;
         if(handCards.size() != 4){
             return false;
         }
         for (int i = 0; i < handCards.size() - 1; i++){
             if (handCards.get(i).getValue() != handCards.get(i + 1).getValue()) {
                 // if there are different values in handCards
-                // then this player isn't win, set the isWin to false
-                isWin = false;
+                // then this player isn't win, set the hasWinner to false
+                return false;
                 //Thread.currentThread().interrupt();
                 // should interrupt other threads
-                break;
             }
         }
-        return isWin;
+        return true;
     }
 
     @Override
@@ -394,9 +401,6 @@ public class Player implements PlayerInterface, Runnable {
         this.handCardAmount = handCardAmount;
     }
 
-
-    public void PLayer() {
-    }
 
 }
 
