@@ -14,9 +14,13 @@ import java.util.Arrays;
 //                card1,card1,card2,card2,card1,card1,card2,card2,
 //                card1,card1,card2,card2,card1,card1,card2,card2
 //        ));
-                ArrayList<Card> pack = new ArrayList<Card>(Arrays.asList(
-                card2,card2,card1,card1,card2,card2,card1,card1,
-                card2,card2,card1,card1,card2,card2,card1,card1
+//                ArrayList<Card> pack = new ArrayList<Card>(Arrays.asList(
+//                card2,card2,card1,card1,card2,card2,card1,card1,
+//                card2,card2,card1,card1,card2,card2,card1,card1
+//        ));
+        ArrayList<Card> pack = new ArrayList<Card>(Arrays.asList(
+                card1,card2,card1,card2,card2,card1,card1,card2,
+                card1,card2,card2,card1,card2,card1,card2,card1
         ));
         game.createDeck(2);
         game.createPlayer(2);
@@ -29,6 +33,7 @@ import java.util.Arrays;
 ////                System.out.println(card.getValue());
 ////            }
 ////        }
+        //Players.get(0).getHandCards().remove(-1);
         Thread thread1 = new Thread(Players.get(0));
         thread1.start();
         Thread thread2 = new Thread(Players.get(1));

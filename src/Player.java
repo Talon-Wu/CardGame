@@ -146,7 +146,12 @@ public class Player implements PlayerInterface, Runnable {
             /* pick card from the left deck, use synchronized to
              ensure any deck can be accessed by only one Player */
                     Card card = discardCard();
-                    System.out.println("Player" + playerNumber +"discardCard");
+                    if(card.getValue() != -1){
+                    System.out.println("Player" + playerNumber +"discardCard, value = "+card.getValue());
+                        } else{
+                        System.out.println("maybe I should win...");
+                        continue;
+                    }
 //                    String message = "Player" + this.playerNumber +
 //                            " discards a " + card.getValue() +
 //                            " to deck " + rightNumber;
@@ -262,6 +267,18 @@ public class Player implements PlayerInterface, Runnable {
                     break;
                 }
             }
+        }
+        if(deleteNumber == -1){
+            System.out.println("failed to delete a card");
+            int i = 0;
+            for (Card card0 : this.getHandCards()) {
+                System.out.println("Player" + this.playerNumber+ "handCards"+ (++i) +":" + card0.getValue());
+            }
+            i = 0;
+            if(checkIWin()){
+                declareAWin();
+            }
+            return new Card(-1);
         }
         int cardint = handCards.get(deleteNumber).getValue();
         System.out.println("successfully deleted card: "+ cardint);
