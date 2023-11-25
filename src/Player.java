@@ -5,32 +5,22 @@ import java.util.logging.Logger;
 public class Player implements PlayerInterface, Runnable {
     private Logger logger = Logger.getLogger(Player.class.getName());
     // added from ShiYu
-    private boolean hasWinner = false;
-    // variable to check if this thread win
     private int playerNumber;
-    private int leftNumber;
-    private int rightNumber;
+    public int leftNumber;
+    public int rightNumber;
     public int lastPlayer;
     public int nextPlayer;
     public int showNumber;
-    public Object lastLock;
-    public Object nextLock;
-    public Object myLock = new Object();
     private ArrayList<Card> handCards = new ArrayList<>();
-    private int handCardAmount;
-    //to record how many card the player has
-
     private String playerFile;
     private String leftDeckFile;
-
     private String rightDeckFile;
     //private Deck[] cardDecks;
     public ArrayList<Deck> cardDecks;
-
-    public boolean roundFinished = false;
     public static Player[] players = new Player[10];
     // max volume of player is 10
     public CardGame gameInstance;
+    //public int lastMost = 0;
 
 //    public void addToHandCards(Card card) {
 //        this.handCards.add(card);
@@ -73,12 +63,6 @@ public class Player implements PlayerInterface, Runnable {
         players[playerNumber] = this;
 
         this.gameInstance = gameInstance;
-        System.out.println("playerNumber: " + playerNumber);
-        System.out.println("leftNumber: " + leftNumber);
-        System.out.println("rightNumber: " + rightNumber);
-        System.out.println("lastPlayer: " + lastPlayer);
-        System.out.println("nextPlayer: " + nextPlayer);
-
     }
 
     @Override
@@ -87,121 +71,57 @@ public class Player implements PlayerInterface, Runnable {
             if (checkIWin()) {
                 declareAWin();
                 // not implemented
-                System.out.println("Player" + playerNumber + " has won");
-                System.out.println("Player" + playerNumber + " exit");
-                if (cardDecks.get(leftNumber).getLock().tryLock()){
-                    cardDecks.get(leftNumber).getLock().unlock();
-                    System.out.println("successfully release lock of deck" + leftNumber);
-                    }
-                if (cardDecks.get(rightNumber).getLock().tryLock()){
-                    cardDecks.get(rightNumber).getLock().unlock();
-                    System.out.println("successfully release lock of deck" + rightNumber);
-                    }
-
+                System.out.println("Player" + showNumber + " has won");
+                System.out.println("Player" + showNumber + " exit");
                 return;
-                }
-
-
+            }
             //!roundFinished
-            if (cardDecks.get(leftNumber).getLock().tryLock()) {
+            synchronized (CardGame.lock) {
                 // now this thread gain the lock of left deck
                 // should have a boolean from CardGame that show if this round of play is over
-                System.out.println("intoLeft");
-                synchronized (cardDecks.get(leftNumber).getLock()) {
-            /* pick card from the left deck, use synchronized to
-             ensure any deck can be accessed by only one Player */
-                    Card card = pickCard();
-                    if (card != null) {
-                        System.out.println("Player" + playerNumber + "pickCard");
-//                        String message = "Player" + this.playerNumber +
-//                                " draws a" + card.getValue() +
-//                                " from deck " + leftNumber;
-//                        logger.log(Level.INFO, message);
-                    }else {
-                        System.out.println("Player" + playerNumber + " can't pickCard");
-                    }
-                    //System.out.println("Player" + this.playerNumber + "handCards:");
-//                    for (Card card0 : this.getHandCards()) {
-//                        System.out.println(card0.getValue());
-//                    }
-                    cardDecks.get(leftNumber).getLock().unlock();
-                    cardDecks.get(leftNumber).getLock().notify();
-                    }
-//                    synchronized (lastLock){
-//                    cardDecks.get(leftNumber).getLock().unlock();
-//                    lastLock.notify();}
+                System.out.println("Player" + showNumber + "gained a lock");
+                Card card = pickCard();
+                if (card != null) {
+                    System.out.println("Player" + showNumber + "pickCard");
                 } else {
-                System.out.println("Player" + playerNumber + "should wait for Player" + lastPlayer);
-                try {synchronized (this){
-                    wait(1500);
-                    continue;
-                }//can be optimized by using wait/notify
-                } catch (InterruptedException e) {
-                    //throw new RuntimeException(e);
-                }
-            }
-            System.out.println("rightNumber: "+ rightNumber);
-            if (cardDecks.get(rightNumber).getLock().tryLock()) {
-                System.out.println("intoRight");
-                synchronized (cardDecks.get(rightNumber).getLock()) {
-            /* pick card from the left deck, use synchronized to
-             ensure any deck can be accessed by only one Player */
-                    Card card = discardCard();
-                    if(card.getValue() != -1){
-                    System.out.println("Player" + playerNumber +"discardCard, value = "+card.getValue());
-                        } else{
-                        System.out.println("maybe I should win...");
-                        continue;
-                    }
-//                    String message = "Player" + this.playerNumber +
-//                            " discards a " + card.getValue() +
-//                            " to deck " + rightNumber;
-//                    logger.log(Level.INFO, message);
-
-                    System.out.println("Player" + this.playerNumber+ "handCards:");
+                    System.out.println("Player" + showNumber + " can't pickCard");
                     int i = 0;
                     for (Card card0 : this.getHandCards()) {
-                        System.out.println("Player" + this.playerNumber+ "handCards"+ (++i) +":" + card0.getValue());
+                        if(card0 != null)
+                            System.out.println("Player" + this.showNumber+ "handCards" + (++i) + ":" + card0.getValue());
                     }
-                    i = 0;
-                    cardDecks.get(rightNumber).getLock().unlock();
-                    cardDecks.get(rightNumber).getLock().notify();
+                    System.out.println("Player" + showNumber + " release lock");
+                    continue;
                 }
-                //synchronized (cardDecks.get(rightNumber).getLock()){}
-
-
-            } else {
-                System.out.println("Player" + playerNumber + "should wait for Player" + nextPlayer);
-                try {
-                    synchronized (this){
-                    wait(1500);
-                    }//can be optimized by using wait/notify
-                } catch (InterruptedException e) {
-                    //throw new RuntimeException(e);
+                Card card1 = discardCard();
+                int i = 0;
+                for (Card card0 : this.getHandCards()) {
+                    if(card0 != null)
+                    System.out.println("Player" + this.showNumber+ "handCards" + (++i) + ":" + card0.getValue());
                 }
+                i = 0;
+                System.out.println("Player" + showNumber + "successfully pick and discard");
             }
-
+            System.out.println("failed to gain a lock");
         }
-        /**
-         * Need something else rather than players to represent the rest of the players.
+        /*
+          Need something else rather than players to represent the rest of the players.
          */
 
-        System.out.println("Player "+this.gameInstance.whoWin.getPlayerNumber()+" has informed player "+this.playerNumber);
+        System.out.println("Player "+this.gameInstance.whoWin.getPlayerNumber()+" has informed player "+this.showNumber);
 //      System.out.println("Player" + winnerNumber + " has won");
-        System.out.println("Player"+ playerNumber+ " 's losing hand: ");
+        System.out.println("Player"+ showNumber+ " 's losing hand: ");
         for (Card card : getHandCards()){
             System.out.println(card.getValue());
         }
-        System.out.println("Player"+ playerNumber+ " now exit.");
+        System.out.println("Player"+ showNumber+ " now exit.");
 
     }
 
     @Override
     public boolean checkIWin() {
-        boolean hasWinner = true;
         if(handCards.size() != 4){
-            return false;
-        }
+            return false;}
         for (int i = 0; i < handCards.size() - 1; i++){
             if (handCards.get(i).getValue() != handCards.get(i + 1).getValue()) {
                 // if there are different values in handCards
@@ -226,23 +146,27 @@ public class Player implements PlayerInterface, Runnable {
         Deck leftDeck = cardDecks.get(leftNumber);
         Card pickedCard;
         //from the Deck array(All the Deck) pick the right one.
-        if(handCards.size() > 5){
+        if(handCards.size() >= 5){
              pickedCard = null;
         }else{
          pickedCard = leftDeck.pickCard();}
         //pick the first card of this deck.
 
-        /* as now the game have a round concept, there
-           is no chance that any deck can be empty.
-         */
-
-
         if(pickedCard != null){
         //pickCard() will return a null if the deck is empty.
         handCards.add(pickedCard);
         //ArrayList.add() will add Object to the end of the list by default
+        int i = 0;
+        for(Card card: leftDeck.getDeckOfCards()){
+            System.out.println("*Picked by Player"+ showNumber +"*"+"Deck"+ (leftNumber + 1)+ " card" + (++i) + ": " + card.getValue());
+        }
+        i = 0;
         return pickedCard;
         } else {
+            int i = 0;
+            for(Card card: leftDeck.getDeckOfCards()){
+                System.out.println("*Picked by Player"+ showNumber +"*"+"Deck"+ (leftNumber + 1)+ " card" + (++i) + ": " + card.getValue());
+            }
            return null;
         //the error Output is left to CardGame class to deal with
         }
@@ -253,7 +177,7 @@ public class Player implements PlayerInterface, Runnable {
     public Card discardCard() {
         int deleteNumber = -1;
         int most = mostFrequentNumber();
-        for (int i = 0; i < handCards.size(); i++) {
+        for (int i = handCards.size() - 1; i >= 0; i--) {
             int num = handCards.get(i).getValue();
             //get every (value of card) of handCards
             if (num != most && num != (showNumber)) {
@@ -265,31 +189,42 @@ public class Player implements PlayerInterface, Runnable {
         if (deleteNumber == -1) {
             //that there are only frequent value and player number value
             //e.g. Player1 {1, 2, 2, 2}
-            for (int i = 0; i < handCards.size(); i++) {
+            for (int i = handCards.size() - 1; i >= 0; i--) {
                 int num = handCards.get(i).getValue();
                 //get every (value of card) of handCards
-                if (num != showNumber) {
-                    // wrong
+                if (num != showNumber ) {
+                    // lastMost changed after deleting a Card,
+                    // if player discard same card
+                    // wrong, problem is Player1{3, 3, 4, 4}
                     deleteNumber = i;
                     break;
                 }
             }
         }
         if(deleteNumber == -1){
-            System.out.println("failed to delete a card");
+            System.out.println("Player" + this.showNumber+"failed to delete a card");
             int i = 0;
             for (Card card0 : this.getHandCards()) {
-                System.out.println("Player" + this.playerNumber+ "handCards"+ (++i) +":" + card0.getValue());
-            }
+                System.out.println("Player" + this.showNumber+ "handCards"+ (++i) +":" + card0.getValue());
+                }
             i = 0;
-            if(checkIWin()){
+            if(checkIWin() && !(CardGame.hasWinner)){
                 declareAWin();
-            }
+                }
+            //lastMost = most;
             return new Card(-1);
         }
         int cardint = handCards.get(deleteNumber).getValue();
-        System.out.println("successfully deleted card: "+ cardint);
-        return handCards.remove(deleteNumber);
+        System.out.println("Player" + this.showNumber+"successfully deleted card: "+ cardint);
+        Card deletedCard = handCards.remove(deleteNumber);
+        Deck rightDeck = cardDecks.get(rightNumber);
+        rightDeck.addToDeck(deletedCard);
+        int i = 0;
+        for(Card card: rightDeck.getDeckOfCards()){
+            System.out.println("*Discard by Player"+ showNumber +"*"+"Deck"+ (rightNumber + 1)+ " card" + (++i) + ": " + card.getValue());
+        }
+        i = 0;
+        return deletedCard;
         // the remove method will both remove an element and return that element
     }
 
@@ -392,15 +327,6 @@ public class Player implements PlayerInterface, Runnable {
     public void setCardDecks(ArrayList<Deck> cardDecks) {
         this.cardDecks = cardDecks;
     }
-
-    public int getHandCardAmount() {
-        return handCardAmount;
-    }
-
-    public void setHandCardAmount(int handCardAmount) {
-        this.handCardAmount = handCardAmount;
-    }
-
 
 }
 

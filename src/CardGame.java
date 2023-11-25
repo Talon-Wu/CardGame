@@ -13,6 +13,8 @@ public class CardGame {
 
     public static boolean hasWinner = false;
 
+    public static Object lock = new Object();
+
     public Player whoWin;
     private ArrayList<Player> players;
 
@@ -187,15 +189,9 @@ public class CardGame {
         ArrayList<Player> players = new ArrayList<>(n);
         for (int i = 0; i < n; i++){
             players.add(new Player(i,n,this.decks,this));
-            System.out.println("Player " + i + " added");
+            System.out.println("Player " + (i + 1) + " added");
         }
         this.players = players;
-        for(Player player : players){
-            player.lastLock = players.get(player.lastPlayer).myLock;
-            player.nextLock = players.get(player.nextPlayer).myLock;
-        }
-//        lastLock = players[lastPlayer].myLock;
-//        nextLock = players[nextPlayer].myLock;
     }
 
     /**

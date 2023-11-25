@@ -7,18 +7,16 @@ public class Deck {
     private ReentrantLock lock = new ReentrantLock();
     private ArrayList<Card> deckOfCards = new ArrayList<>();// cardsOfDeck 更好
     public Card pickCard(){
-       // if(!deckOfCards.isEmpty()){
-            Card pickedCard = deckOfCards.get(0);
+        if(!deckOfCards.isEmpty()){
+            Card pickedCard = deckOfCards.remove(0);
             return pickedCard;
-        //} else{
-        //    return null;
-       // }
+        } else{
+            System.out.println("This Deck is empty");
+            return null;
+       }
     }
     public void addToDeck(Card card) {
-        this.deckOfCards.add(card);
-    }
-    public ReentrantLock getLock() {
-        return lock;
+        this.deckOfCards.add(deckOfCards.size(),card);
     }
     public ArrayList<Card> getDeckOfCards() {
         return deckOfCards;
