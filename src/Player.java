@@ -1,9 +1,13 @@
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 public class Player implements PlayerInterface, Runnable {
-    private Logger logger = Logger.getLogger(Player.class.getName());
+    private Logger logger;
     // added from ShiYu
     private int playerNumber;
     public int leftNumber;
@@ -14,7 +18,6 @@ public class Player implements PlayerInterface, Runnable {
     private ArrayList<Card> handCards = new ArrayList<>();
     private String playerFile;
     private String leftDeckFile;
-    private String rightDeckFile;
     //private Deck[] cardDecks;
     public ArrayList<Deck> cardDecks;
     public static Player[] players = new Player[10];
@@ -51,12 +54,20 @@ public class Player implements PlayerInterface, Runnable {
         }
         this.leftNumber = playerNumber;
         // The ArrayList start from 0, so the left number should - 1
-        this.playerFile = "Player" + this.playerNumber + "_output.txt";
-        this.leftDeckFile = "Deck" + leftNumber + "_output.txt";
-        this.rightDeckFile = "Deck" + rightNumber + "_output.txt";
+        this.playerFile = "Player" + this.showNumber + "_output.txt";
+        this.leftDeckFile = "Deck" + this.showNumber + "_output.txt";
         // added from ShiYu
+        this.logger = Logger.getLogger("Player"+this.showNumber);
+        logger.setUseParentHandlers(false);
         try {
-            logger.addHandler(new FileHandler("Player" + this.playerNumber + ".log"));
+            FileHandler fh = new FileHandler(this.playerFile);
+            fh.setFormatter(new Formatter() {
+                @Override
+                public String format(LogRecord record) {
+                    return record.getMessage() + System.lineSeparator();
+                }
+            });
+            logger.addHandler(fh);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -70,10 +81,10 @@ public class Player implements PlayerInterface, Runnable {
         while (!CardGame.hasWinner) {
             if (checkIWin()) {
                 declareAWin();
-                // not implemented
                 System.out.println("Player" + showNumber + " has won");
                 System.out.println("Player" + showNumber + " exit");
-                return;
+                logger.log(Level.INFO, "Player " + showNumber + " wins");
+                break;
             }
             //!roundFinished
             synchronized (CardGame.lock) {
@@ -83,6 +94,7 @@ public class Player implements PlayerInterface, Runnable {
                 Card card = pickCard();
                 if (card != null) {
                     System.out.println("Player" + showNumber + "pickCard");
+                    logger.log(Level.INFO, "player "+this.showNumber+" draws a "+card.getValue()+" from deck "+this.leftNumber);
                 } else {
                     System.out.println("Player" + showNumber + " can't pickCard");
                     int i = 0;
@@ -94,28 +106,31 @@ public class Player implements PlayerInterface, Runnable {
                     continue;
                 }
                 Card card1 = discardCard();
+                int rightShowNumber = this.rightNumber + 1;
+                logger.log(Level.INFO, "player "+this.playerNumber+" discards a "+card.getValue()+" from deck "+rightShowNumber);
                 int i = 0;
                 for (Card card0 : this.getHandCards()) {
-                    if(card0 != null)
+                    if(card0 != null) 
                     System.out.println("Player" + this.showNumber+ "handCards" + (++i) + ":" + card0.getValue());
                 }
                 i = 0;
                 System.out.println("Player" + showNumber + "successfully pick and discard");
+                logger.log(Level.INFO, "player "+this.showNumber+" current hand is "+this.handCards.toString());
             }
             System.out.println("failed to gain a lock");
         }
         /*
           Need something else rather than players to represent the rest of the players.
          */
-
-        System.out.println("Player "+this.gameInstance.whoWin.getPlayerNumber()+" has informed player "+this.showNumber);
-//      System.out.println("Player" + winnerNumber + " has won");
-        System.out.println("Player"+ showNumber+ " 's losing hand: ");
-        for (Card card : getHandCards()){
-            System.out.println(card.getValue());
+        if (this.gameInstance.whoWin != this) {
+            logger.log(Level.INFO, "Player "+this.gameInstance.whoWin.showNumber+" has informed player "+this.showNumber+" that player "+this.gameInstance.whoWin.showNumber+" has won.");
         }
-        System.out.println("Player"+ showNumber+ " now exit.");
+        logger.log(Level.INFO, "Player "+this.showNumber+" exits");
+        logger.log(Level.INFO, "Player "+ showNumber+ " final hand: "+this.handCards.toString());
 
+        try(FileWriter writer = new FileWriter(this.leftDeckFile)) {
+            writer.write("deck"+this.showNumber+" contents: "+this.cardDecks.get(this.playerNumber).getDeckOfCards().toString());
+        } catch (IOException ignored) {}
     }
 
     @Override
@@ -310,14 +325,6 @@ public class Player implements PlayerInterface, Runnable {
 
     public void setLeftDeckFile(String leftDeckFile) {
         this.leftDeckFile = leftDeckFile;
-    }
-
-    public String getRightDeckFile() {
-        return rightDeckFile;
-    }
-
-    public void setRightDeckFile(String rightDeckFile) {
-        this.rightDeckFile = rightDeckFile;
     }
 
     public ArrayList<Deck> getCardDecks() {
